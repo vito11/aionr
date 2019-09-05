@@ -13,7 +13,7 @@
 		"registrar" : "0xe3389675d0338462dC76C6f9A3e432550c36A142000000000000000000000000",
 		"maximumExtraDataSize": "0x20",
 		"minGasLimit": "0x100590",
-                "monetaryPolicyUpdate": "2393000"
+        "monetaryPolicyUpdate": "0"
 	},
 	"genesis": {
 		"seal": {
@@ -26,7 +26,7 @@
 		"author": "0xa00e7d012e80e11c75968ffc7657c81a116029cf1d8925f7a6e52580e26d865f",
 		"timestamp": "1567110000",
 		"parentHash": "0x10e71bf64dcb8c60766ccb491ab6e3acec1ab07d0d5a088fcf533cbfbc801295",
-		"extraData": "0x0000000000000000000000000000000000000000000000000000000000000020",
+		"extraData": "0x000000000000000000000000000000000000000000000000000000000000001e",
 		"gasLimit": "0xE4E1C0"
 	},
 	"accounts": {

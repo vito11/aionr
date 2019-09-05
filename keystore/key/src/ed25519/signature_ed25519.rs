@@ -84,7 +84,9 @@ impl Hash for Ed25519Signature {
 impl From<Vec<u8>> for Ed25519Signature {
     fn from(s: Vec<u8>) -> Self {
         let mut sig = [0u8; 96];
-        sig.copy_from_slice(&s);
+        if s.len() == 96 {
+            sig.copy_from_slice(&s);
+        }
         Ed25519Signature(sig)
     }
 }

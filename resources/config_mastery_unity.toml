@@ -1,5 +1,5 @@
 [aion]
-chain = "resources/mastery_unity.json"
+chain = "mastery/mastery_unity.json"
 
 [network]
 max_peers = 32
