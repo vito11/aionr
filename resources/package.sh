@@ -26,7 +26,7 @@ cargo build --release
 
 cp target/release/aion package/$1
 LIBAVMJNI=$(readlink -f target/release/build/avm*/out/libavmjni.so)
-cp $LIBAVMJNI package/$1/libs/libavmjni.so
+cp $LIBAVMJNI package/$1/libs/
 cp -r vms/avm/libs/aion_vm package/$1/libs
 
 

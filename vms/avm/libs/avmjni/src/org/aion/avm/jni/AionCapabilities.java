@@ -3,8 +3,8 @@ package org.aion.avm.jni;
 import org.aion.avm.core.IExternalCapabilities;
 import org.aion.types.AionAddress;
 import org.aion.types.Transaction;
-import org.aion.vm.api.interfaces.TransactionContext;
-import org.aion.vm.api.interfaces.TransactionInterface;
+// import org.aion.vm.api.interfaces.TransactionContext;
+// import org.aion.vm.api.interfaces.TransactionInterface;
 
 public class AionCapabilities implements IExternalCapabilities {
 

@@ -49,7 +49,7 @@ public class Substate implements IExternalState {
     private class EnvInfo {
         private AionAddress coinbase;
         private long blockTimestamp;
-        private long blockDifficulty;
+        private BigInteger blockDifficulty;
         private long blockGasLimit;
         private long blockNumber;
     }
@@ -75,7 +75,7 @@ public class Substate implements IExternalState {
     public void updateEnvInfo(Message msg) {
         byte[] difficulty = Arrays.copyOfRange(msg.blockDifficulty, 8, 16);
         NativeDecoder decoder = new NativeDecoder(difficulty);
-        this.info.blockDifficulty = decoder.decodeLong();
+        this.info.blockDifficulty = new BigInteger(difficulty);//decoder.decodeLong();
         this.info.blockTimestamp = msg.blockTimestamp;
         this.info.blockGasLimit = msg.blockEnergyLimit;
         this.info.blockNumber = msg.blockNumber;
@@ -286,20 +286,20 @@ public class Substate implements IExternalState {
         return this.parent.getBlockHashByNumber(blockNumber);
     }
 
-    @Override
-    public void payMiningFee(AionAddress address, BigInteger fee) {
-        adjustBalance(address, fee);
-    }
+    // @Override
+    // public void payMiningFee(AionAddress address, BigInteger fee) {
+    //     adjustBalance(address, fee);
+    // }
 
     @Override
     public void refundAccount(AionAddress address, BigInteger amount) {
         adjustBalance(address, amount);
     }
 
-    @Override
-    public void deductEnergyCost(AionAddress address, BigInteger cost) {
-        adjustBalance(address, cost);
-    }
+    // @Override
+    // public void deductEnergyCost(AionAddress address, BigInteger cost) {
+    //     adjustBalance(address, cost);
+    // }
 
     @Override
     public void removeStorage(AionAddress address, byte[] key) {
@@ -358,7 +358,7 @@ public class Substate implements IExternalState {
     }
 
     @Override
-    public long getBlockDifficulty() {
+    public BigInteger getBlockDifficulty() {
         if (Constants.DEBUG) {
             System.out.print("Block Difficulty: ");
             System.out.println(this.info.blockDifficulty);

@@ -1,6 +1,6 @@
 package org.aion.avm.jni;
 
-import org.aion.vm.api.interfaces.KernelInterface;
+// import org.aion.vm.api.interfaces.KernelInterface;
 import org.aion.types.AionAddress;
 
 import org.aion.avm.core.IExternalState;
@@ -153,12 +153,12 @@ public class NativeKernelInterface implements IExternalState {
         return getBlockHashByNumber(handle, blockNumber);
     }
 
-    @Override
-    public void payMiningFee(AionAddress address, BigInteger fee) {
-        // System.out.println("Native: avm trys to pay mining fee");
-        // This method may have special logic in the kernel. Here it is just adjustBalance.
-        adjustBalance(address, fee);
-    }
+    // @Override
+    // public void payMiningFee(AionAddress address, BigInteger fee) {
+    //     // System.out.println("Native: avm trys to pay mining fee");
+    //     // This method may have special logic in the kernel. Here it is just adjustBalance.
+    //     adjustBalance(address, fee);
+    // }
 
     @Override
     public void refundAccount(AionAddress address, BigInteger amount) {
@@ -166,11 +166,11 @@ public class NativeKernelInterface implements IExternalState {
         adjustBalance(address, amount);
     }
 
-    @Override
-    public void deductEnergyCost(AionAddress address, BigInteger cost) {
-        // This method may have special logic in the kernel. Here it is just adjustBalance.
-        adjustBalance(address, cost);
-    }
+    // @Override
+    // public void deductEnergyCost(AionAddress address, BigInteger cost) {
+    //     // This method may have special logic in the kernel. Here it is just adjustBalance.
+    //     adjustBalance(address, cost);
+    // }
 
     @Override
     public void removeStorage(AionAddress address, byte[] key) {
@@ -197,7 +197,7 @@ public class NativeKernelInterface implements IExternalState {
 
     // Camus: this should not be in kernel interface
     @Override
-    public long getBlockDifficulty() {
+    public BigInteger getBlockDifficulty() {
         throw new AssertionError("Did not expect this to be called.");
     }
 

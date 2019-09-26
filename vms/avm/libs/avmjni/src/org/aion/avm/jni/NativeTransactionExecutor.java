@@ -2,12 +2,12 @@ package org.aion.avm.jni;
 
 import java.util.List;
 
-import org.aion.vm.api.interfaces.KernelInterface;
-import org.aion.vm.api.interfaces.SimpleFuture;
-import org.aion.vm.api.interfaces.TransactionInterface;
+// import org.aion.vm.api.interfaces.KernelInterface;
+// import org.aion.vm.api.interfaces.SimpleFuture;
+// import org.aion.vm.api.interfaces.TransactionInterface;
 // import org.aion.vm.api.interfaces.TransactionResult;
-import org.aion.vm.api.interfaces.IExecutionLog;
-import org.aion.vm.api.interfaces.TransactionSideEffects;
+// import org.aion.vm.api.interfaces.IExecutionLog;
+// import org.aion.vm.api.interfaces.TransactionSideEffects;
 import org.aion.avm.core.AvmImpl;
 import org.aion.avm.core.CommonAvmFactory;
 import org.aion.avm.core.IExternalCapabilities;

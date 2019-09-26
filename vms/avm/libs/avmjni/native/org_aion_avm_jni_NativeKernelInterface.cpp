@@ -328,6 +328,8 @@ JNIEXPORT jbyteArray JNICALL Java_org_aion_avm_jni_NativeKernelInterface_sendSig
     // convert into JVM byte array.
     jbyteArray ret = is_null(&v) ? NULL : to_jbyteArray(env, v.pointer, v.length);
 
+    printf("state ptr: %p\n", v.pointer);
+
     // release the buffer
     release_bytes(&v);
 

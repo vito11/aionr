@@ -1,8 +1,8 @@
 package org.aion.avm.jni;
 
-import org.aion.vm.api.interfaces.TransactionSideEffects;
+// import org.aion.vm.api.interfaces.TransactionSideEffects;
 
-import org.aion.vm.api.interfaces.TransactionInterface;
+// import org.aion.vm.api.interfaces.TransactionInterface;
 import org.aion.avm.core.BillingRules;
 
 import org.aion.types.AionAddress;
