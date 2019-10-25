@@ -65,6 +65,7 @@ public final class AvmResourcesV2 implements Closeable {
         File avmUserlibJar = new File(projectRootPath + AvmDependencyInfo.userlibJarPathVersion2);
         File avmApiJar = new File(projectRootPath + AvmDependencyInfo.apiJarPathVersion2);
         File rustJniJar = new File(projectRootPath + AvmDependencyInfo.rustJniVersion2);
+        File avmUtils = new File(projectRootPath + AvmDependencyInfo.avmUtils);
         File aionTypes = new File(projectRootPath + AvmDependencyInfo.aionTypes);
         File asm = new File(projectRootPath + org.aion.avm.version.AvmDependencyInfo.asm);
         File asm_analysis = new File(projectRootPath + org.aion.avm.version.AvmDependencyInfo.asm_analysis);
@@ -82,6 +83,7 @@ public final class AvmResourcesV2 implements Closeable {
                 avmUserlibJar.toURI().toURL(),
                 avmApiJar.toURI().toURL(),
                 rustJniJar.toURI().toURL(),
+                avmUtils.toURI().toURL(),
                 aionTypes.toURI().toURL(),
                 asm.toURI().toURL(),
                 asm_tree.toURI().toURL(),
