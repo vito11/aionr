@@ -1,28 +1,14 @@
-# AionR
-
-[![Join the chat at https://gitter.im/aionnetwork](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/aionnetwork)
-[![license](https://img.shields.io/github/license/aionnetwork/aion.svg)](https://github.com/aionnetwork/aionr/blob/dev/LICENSE)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/aionnetwork/aion/issues)
-
-
-<img src="aion-rust-logo.png" alt="drawing" width="500"/>
-
-This repository contains the rust kernel implementation and releases for the Aion Network. This is different from the [Java kernel implementation](https://github.com/aionnetwork/aion).
-
-Mainstream adoption of blockchains is limited because of scalability, privacy, and interoperability challenges. Aion is a multi-tier blockchain network designed to address these challenges.
-
-The [Aion White Papers](https://aion.network/developers/#whitepapers) provides more details on our design and project roadmap.
+# AionR for Aarch64/Raspberry Pi 4B
 
 ## Install the Kernel
 
-Follow this guide to install the Aion Rust kernel on your system.
+Follow this guide to install the Aion Rust kernel on your PI 4B.
 
 ### System Requirements
 
-- Ubuntu 16.04 or Ubuntu 18.04
+- Ubuntu 18.04
 - 4GB RAM
-- 2 core CPU
-- 50GB Hard Drive Space (Current Mainnet DB about 30GB)
+- Micro SD card 64/128 GB (Current Mainnet DB about 30GB)
 
 ### Prerequisites Installation
 
@@ -36,7 +22,7 @@ Follow this guide to install the Aion Rust kernel on your system.
 2. Install Rust `v1.28.0`:
 
     ```bash
-    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.28.0 --default-host x86_64-unknown-linux-gnu
+    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.28.0
     ```
 
     Select option `1` when prompted.
@@ -51,31 +37,21 @@ Follow this guide to install the Aion Rust kernel on your system.
     ```
 
 4. Install Boost `v1.65.1`
+    
+    ```bash
+    sudo apt-get install libboost-all-dev -y
+    ```
 
-    - Ubuntu `16.04`:
+5. Install JAVA JDK
 
-        ```bash
-        wget https://dl.bintray.com/boostorg/release/1.65.1/source/boost_1_65_1.tar.bz2
-        tar xf boost_1_65_1.tar.bz2
-        cd boost_1_65_1
-        ./bootstrap.sh --libdir=/usr/lib/x86_64-linux-gnu/
-        ./b2
-        ./b2 install
-        ```
+    ```bash
+    sudo apt-get install openjdk-11-jdk -y
+    ```
 
-    - Ubuntu `18.04`:
+6. Install Apache Ant 10
+    * [Apache Ant 10](http://mirror.reverse.net/pub/apache//ant/binaries/apache-ant-1.10.7-bin.tar.gz)
 
-        ```bash
-        sudo apt-get install libboost-all-dev -y
-        ```
-
-5. Install JAVA JDK: :new:
-    * [JDK 11](https://download.java.net/java/GA/jdk11/13/GPL/openjdk-11.0.1_linux-x64_bin.tar.gz) or higher.
-
-6. Install Apache Ant 10: :new:
-    * [Apache Ant 10](http://ftp.tsukuba.wide.ad.jp/software/apache//ant/binaries/apache-ant-1.10.5-bin.tar.gz)
-
-7. Set Environment Variables: :new:
+7. Set Environment Variables
     ```bash
     export JAVA_HOME=<jdk_directory_location>
     export ANT_HOME=<apache_ant_directory>	
@@ -90,7 +66,7 @@ Once you have installed the prerequisites, follow these steps to build the kerne
 1. Download the Aion Rust git repository:
 
     ```bash
-    git clone https://github.com/aionnetwork/aionr.git
+    git clone https://github.com/vito11/aionr.git
     cd aionr
     ```
 
@@ -144,37 +120,4 @@ $ ./mainnet.sh
 > 2019-11-06 13:54:10      genesis: 30793b4ea012c6d3a58c85c5b049962669369807a98e36807c1b02116417f823
 
 ```
-
-### Connecting to JSON RPC Services
-
-RPC services can be connected from the following addresses:
-
-- **HTTP**: Port `8545`
-- **WebSocket**: Port `8546`
-- **IPC**: `$Home/.aion/jsonrpc.ipc`
-
-See the [user manual](https://github.com/aionnetwork/aionr/wiki/User-Manual) or [CMD & Config](https://github.com/aionnetwork/aionr/wiki/CMD-&-Config) wiki to find how to change RPC port settings.
-
-### Miners
-
-If you're interested in mining on the Aion networks, refer to our [Aion Mining Docs](https://docs.aion.network/docs/aion-mining-overview)
-
-### Users
-
-If you're interested in interacting with blockchain applications and _using_ `AION` coins, refer to our [Aion Desktop Wallet Docs](https://docs.aion.network/docs/aion-desktop-wallet).
-
-## Contact
-
-To keep up to date by joining the following channels:
-
-- [Aion Forum](https://forum.aion.network/)  
-- [Aion Gitter](https://gitter.im/aionnetwork)  
-- [Aion Reddit](https://www.reddit.com/r/AionNetwork/)  
-- [Aion Medium](https://blog.aion.network/)
-
-For more information about Aion Community please refer to [Aion Community](https://aion.network/community/)
-
-## License
-
-Aion is released under the [GPL-V3 license](LICENSE)
 
