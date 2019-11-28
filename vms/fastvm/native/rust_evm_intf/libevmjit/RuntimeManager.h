@@ -17,7 +17,7 @@ using namespace evmjit;
 class RuntimeManager: public CompilerHelper
 {
 public:
-	RuntimeManager(IRBuilder& _builder, code_iterator _codeBegin, code_iterator _codeEnd);
+	RuntimeManager(IRBuilder& _builder, code_iterator _codeBegin, code_iterator _codeEnd,llvm::GlobalVariable* _gasout);
 
 	llvm::Value* getRuntimePtr();
 	llvm::Value* getDataPtr();
@@ -41,7 +41,7 @@ public:
 	void registerReturnData(llvm::Value* _index, llvm::Value* _size); // TODO: Move to Memory.
 
 	void exit(ReturnCode _returnCode);
-
+    void gasOutExit(ReturnCode _returnCode,llvm::Instruction* gas_check, llvm::Instruction* split_before);
 	void abort(llvm::Value* _jmpBuf);
 
 	llvm::Value* getStackBase() const { return m_stackBase; }
@@ -77,7 +77,6 @@ private:
 	llvm::Value* m_envPtr = nullptr;
 	llvm::Value* m_returnBufDataPtr = nullptr;
 	llvm::Value* m_returnBufSizePtr = nullptr;
-
 	llvm::Value* m_txCtxLoaded = nullptr;
 	llvm::Value* m_txCtx = nullptr;
 	llvm::Function* m_loadTxCtxFn = nullptr;
@@ -92,6 +91,8 @@ private:
 	code_iterator m_codeBegin = {};
 	code_iterator m_codeEnd = {};
 	llvm::Value* m_codePtr = nullptr;
+
+    llvm::GlobalVariable* m_gasout = nullptr;
 };
 
 }

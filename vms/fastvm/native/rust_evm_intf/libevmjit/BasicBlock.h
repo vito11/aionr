@@ -19,7 +19,7 @@ class RuntimeManager;
 class LocalStack: public CompilerHelper
 {
 public:
-	explicit LocalStack(IRBuilder& _builder, RuntimeManager& _runtimeManager);
+	explicit LocalStack(IRBuilder& _builder, RuntimeManager& _runtimeManager,llvm::GlobalVariable* _gasout);
 
 	/// Pushes value on stack
 	void push(llvm::Value* _value);
@@ -49,7 +49,6 @@ private:
 	void set(size_t _index, llvm::Value* _value);
 
 	llvm::Function* getStackPrepareFunc();
-
 	/// Items fetched from global stack. First element matches the top of the global stack.
 	/// Can contain nulls if some items has been skipped.
 	std::vector<llvm::Value*> m_input;
@@ -62,6 +61,9 @@ private:
 	ssize_t m_globalPops = 0; 	///< Number of items poped from global stack. In other words: global - local stack overlap.
 	ssize_t m_minSize = 0;		///< Minimum reached local stack size. Can be negative.
 	ssize_t m_maxSize = 0;		///< Maximum reached local stack size.
+
+	llvm::GlobalVariable* m_gasout = nullptr;
+
 };
 
 class BasicBlock

@@ -30,8 +30,9 @@ BasicBlock::BasicBlock(instr_idx _firstInstrIdx, code_iterator _begin, code_iter
 	m_llvmBB(llvm::BasicBlock::Create(_mainFunc->getContext(), {".", std::to_string(_firstInstrIdx)}, _mainFunc))
 {}
 
-LocalStack::LocalStack(IRBuilder& _builder, RuntimeManager& _runtimeManager):
-	CompilerHelper(_builder)
+LocalStack::LocalStack(IRBuilder& _builder, RuntimeManager& _runtimeManager, llvm::GlobalVariable* _gasout):
+	CompilerHelper(_builder),
+	m_gasout(_gasout)
 {
 	// Call stack.prepare. min, max, size args will be filled up in finalize().
 	auto undef = llvm::UndefValue::get(Type::Size);
@@ -192,9 +193,17 @@ llvm::Function* LocalStack::getStackPrepareFunc()
 	m_builder.CreateRet(sp);
 
 	m_builder.SetInsertPoint(outOfStackBB);
-	auto longjmp = llvm::Intrinsic::getDeclaration(getModule(), llvm::Intrinsic::eh_sjlj_longjmp);
-	m_builder.CreateCall(longjmp, {jmpBuf});
-	m_builder.CreateUnreachable();
+	//auto longjmp = llvm::Intrinsic::getDeclaration(getModule(), llvm::Intrinsic::eh_sjlj_longjmp);
+	//m_builder.CreateCall(longjmp, {jmpBuf});
+	m_builder.CreateStore(m_builder.getInt1(1), m_gasout);
+
+	newSize = m_builder.CreateNSWAdd(size, diff, "size.next");
+	m_builder.CreateAlignedStore(newSize, sizePtr, sizeAlignment);
+	sp = m_builder.CreateGEP(base, size, "sp");
+	m_builder.CreateRet(sp);
+
+
+    //m_builder.CreateUnreachable();
 
 	return func;
 }

@@ -16,7 +16,7 @@ using namespace evmjit;
 class GasMeter : public CompilerHelper // TODO: Use RuntimeHelper
 {
 public:
-	GasMeter(IRBuilder& _builder, RuntimeManager& _runtimeManager, evm_revision rev);
+	GasMeter(IRBuilder& _builder, RuntimeManager& _runtimeManager, evm_revision rev,llvm::GlobalVariable* _gasout);
 
 	/// Count step cost of instruction
 	void count(Instruction _inst);
@@ -62,6 +62,9 @@ private:
 
 	/// EVM revision.
 	evm_revision m_rev;
+
+	llvm::GlobalVariable* m_gasout = nullptr;
+
 };
 
 }

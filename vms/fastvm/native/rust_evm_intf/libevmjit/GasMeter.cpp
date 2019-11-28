@@ -15,13 +15,17 @@ namespace eth
 namespace jit
 {
 
-GasMeter::GasMeter(IRBuilder& _builder, RuntimeManager& _runtimeManager, evm_revision rev):
+GasMeter::GasMeter(IRBuilder& _builder, RuntimeManager& _runtimeManager, evm_revision rev, llvm::GlobalVariable* _gasout):
 	CompilerHelper(_builder),
 	m_runtimeManager(_runtimeManager),
-    m_rev(rev)
+    m_rev(rev),
+	m_gasout(_gasout)
+
 {
 	llvm::Type* gasCheckArgs[] = {Type::Gas->getPointerTo(), Type::Gas, Type::BytePtr};
-	m_gasCheckFunc = llvm::Function::Create(llvm::FunctionType::get(Type::Void, gasCheckArgs, false), llvm::Function::PrivateLinkage, "gas.check", getModule());
+    llvm::ConstantInt* constant_1 = llvm::ConstantInt::get(Type::Bool, 1);
+
+	m_gasCheckFunc = llvm::Function::Create(llvm::FunctionType::get(Type::Bool, gasCheckArgs, false), llvm::Function::PrivateLinkage, "gas.check", getModule());
 	m_gasCheckFunc->setDoesNotThrow();
 	m_gasCheckFunc->addAttribute(1, llvm::Attribute::NoCapture);
 
@@ -46,11 +50,16 @@ GasMeter::GasMeter(IRBuilder& _builder, RuntimeManager& _runtimeManager, evm_rev
 
 	m_builder.SetInsertPoint(updateBB);
 	m_builder.CreateStore(gasUpdated, gasPtr);
-	m_builder.CreateRetVoid();
+
+	m_builder.CreateRet(m_builder.getInt1(0));
 
 	m_builder.SetInsertPoint(outOfGasBB);
-	m_runtimeManager.abort(jmpBuf);
-	m_builder.CreateUnreachable();
+	
+	m_builder.CreateStore(m_builder.getInt1(1), m_gasout);
+	//m_runtimeManager.abort(jmpBuf);
+    //aarch64 not support setjmp/longjmp exception, so we return bool here, and exit on mainFun block 
+	m_builder.CreateRet(m_builder.getInt1(1));
+	//m_builder.CreateUnreachable();
 }
 
 void GasMeter::count(Instruction _inst)
@@ -59,6 +68,7 @@ void GasMeter::count(Instruction _inst)
 	{
 		// Create gas check call with mocked block cost at begining of current cost-block
 		m_checkCall = m_builder.CreateCall(m_gasCheckFunc, {m_runtimeManager.getGasPtr(), llvm::UndefValue::get(Type::Gas), m_runtimeManager.getJmpBuf()});
+	    //m_runtimeManager.myexit(ReturnCode::OutOfGas,m_checkCall);
 	}
 
 	m_blockCost += getStepCost(_inst);
@@ -75,7 +85,8 @@ void GasMeter::count(llvm::Value* _cost, llvm::Value* _jmpBuf, llvm::Value* _gas
 	}
 
 	assert(_cost->getType() == Type::Gas);
-	m_builder.CreateCall(m_gasCheckFunc, {_gasPtr ? _gasPtr : m_runtimeManager.getGasPtr(), _cost, _jmpBuf ? _jmpBuf : m_runtimeManager.getJmpBuf()});
+	llvm::CallInst* gas_check = m_builder.CreateCall(m_gasCheckFunc, {_gasPtr ? _gasPtr : m_runtimeManager.getGasPtr(), _cost, _jmpBuf ? _jmpBuf : m_runtimeManager.getJmpBuf()});
+	//m_runtimeManager.myexit(ReturnCode::OutOfGas,gas_check);
 }
 
 void GasMeter::countExp(llvm::Value* _exponent)

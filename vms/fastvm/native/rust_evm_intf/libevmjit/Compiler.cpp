@@ -10,7 +10,9 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IntrinsicInst.h>
 #include "preprocessor/llvm_includes_end.h"
-
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Bitcode/BitcodeWriter.h>
+#include <llvm/Support/FileSystem.h>
 #include "JIT.h"
 #include "Instruction.h"
 #include "Type.h"
@@ -117,6 +119,44 @@ std::vector<BasicBlock> Compiler::createBasicBlocks(code_iterator _codeBegin, co
 
 	return blocks;
 }
+void Compiler::makeGasoutSupportAarch64(RuntimeManager& runtimeManager)
+{
+	std::vector<llvm::Instruction*> gasCheck_Instuctions;
+	std::vector<llvm::Instruction*> next_Instuctions;
+
+	// Iterate through all EVM instructions blocks (skip first one and last 4 - special blocks).
+	for (auto it = std::next(m_mainFunc->begin()), end = std::prev(m_mainFunc->end(), 4); it != end; ++it)
+	{
+		auto name = it->getName();
+		for (llvm::BasicBlock::iterator i = it->begin(), e = it->end(); i != e; ++i) {
+			llvm::Instruction* ii = &*i;
+
+			if (llvm::isa<llvm::CallInst>(ii)) {
+			  llvm::CallInst* gasCheck_call = llvm::cast<llvm::CallInst>(ii);
+			  llvm::StringRef name = gasCheck_call->getCalledFunction()->getName();
+			  if(name.equals("gas.check") && std::next(i)!= e)
+			  {
+				llvm::Instruction* next = &*(std::next(i));
+				gasCheck_Instuctions.push_back(ii);
+				next_Instuctions.push_back(next);
+				break;
+			  }
+			}
+		}
+	}
+	for (int index=0; index < gasCheck_Instuctions.size();index++)
+	{
+		llvm::Instruction* ins= gasCheck_Instuctions[index];
+		llvm::Instruction* next= next_Instuctions[index];
+
+		runtimeManager.gasOutExit(ReturnCode::OutOfGas, ins, next);
+		/*llvm::errs() << *ins << "\n";
+		llvm::errs() << *next << "\n";
+		llvm::errs() << "\n";*/
+
+	}
+
+}
 
 void Compiler::resolveJumps()
 {
@@ -166,13 +206,19 @@ void Compiler::resolveJumps()
 std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_iterator _end, std::string const& _id)
 {
 	auto module = llvm::make_unique<llvm::Module>(_id, m_builder.getContext()); // TODO: Provide native DataLayout
+    llvm::Module *m = module.get();
 
 	// Create main function
 	auto mainFuncType = llvm::FunctionType::get(Type::MainReturn, Type::RuntimePtr, false);
 	m_mainFunc = llvm::Function::Create(mainFuncType, llvm::Function::ExternalLinkage, _id, module.get());
 	m_mainFunc->args().begin()->setName("rt");
 
+    llvm::GlobalVariable* gas_out = new llvm::GlobalVariable(*m, Type::Bool,false, llvm::GlobalValue::CommonLinkage,0,"gas_out");
+	gas_out->setInitializer(m_builder.getInt1(0));
+
+
 	// Create entry basic block
+
 	auto entryBB = llvm::BasicBlock::Create(m_builder.getContext(), "Entry", m_mainFunc);
 
 	auto blocks = createBasicBlocks(_begin, _end);
@@ -180,7 +226,7 @@ std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_itera
  	// Special "Stop" block. Guarantees that there exists a next block after the code blocks (also when there are no code blocks).
 	auto stopBB = llvm::BasicBlock::Create(m_mainFunc->getContext(), "Stop", m_mainFunc);
 	m_jumpTableBB = llvm::BasicBlock::Create(m_mainFunc->getContext(), "JumpTable", m_mainFunc);
-	auto abortBB = llvm::BasicBlock::Create(m_mainFunc->getContext(), "Abort", m_mainFunc);
+	auto abortBB = llvm::BasicBlock::Create(m_mainFunc->getContext(), "Abort", m_mainFunc);	
 
 	m_builder.SetInsertPoint(m_jumpTableBB); // Must be before basic blocks compilation
 	auto target = m_builder.CreatePHI(Type::Word, 16, "target");
@@ -190,8 +236,8 @@ std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_itera
 
 
 	// Init runtime structures.
-	RuntimeManager runtimeManager(m_builder, _begin, _end);
-	GasMeter gasMeter(m_builder, runtimeManager, m_rev);
+	RuntimeManager runtimeManager(m_builder, _begin, _end, gas_out);
+	GasMeter gasMeter(m_builder, runtimeManager, m_rev, gas_out);
 	Memory memory(runtimeManager, gasMeter, m_rev);
 	Ext ext(runtimeManager, memory);
 	Arith128 arith(m_builder);
@@ -212,7 +258,7 @@ std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_itera
 	m_builder.CreateCondBr(normalFlow, entryBB->getNextNode(), abortBB, Type::expectTrue);
 
 	for (auto& block: blocks)
-		compileBasicBlock(block, runtimeManager, arith, memory, ext, gasMeter);
+		compileBasicBlock(block, runtimeManager, arith, memory, ext, gasMeter,gas_out);
 
 	// Code for special blocks:
 	m_builder.SetInsertPoint(stopBB);
@@ -222,6 +268,18 @@ std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_itera
 	runtimeManager.exit(ReturnCode::OutOfGas);
 
 	resolveJumps();
+
+	makeGasoutSupportAarch64(runtimeManager);
+
+
+	/* dump bitcode for debug
+	bitcode can be convert to readable IR code by llvm-dis
+
+	std::error_code EC;
+    llvm::raw_fd_ostream OS("./module", EC, llvm::sys::fs::F_None);
+    WriteBitcodeToFile(m, OS);
+    OS.flush();*/
+
 
 	return module;
 }
@@ -252,10 +310,10 @@ llvm::Value * Compiler::popWord256(LocalStack& stack)
 }
 
 void Compiler::compileBasicBlock(BasicBlock& _basicBlock, RuntimeManager& _runtimeManager,
-								 Arith128& _arith, Memory& _memory, Ext& _ext, GasMeter& _gasMeter)
+								 Arith128& _arith, Memory& _memory, Ext& _ext, GasMeter& _gasMeter, llvm::GlobalVariable* _gasout)
 {
 	m_builder.SetInsertPoint(_basicBlock.llvm());
-	LocalStack stack{m_builder, _runtimeManager};
+	LocalStack stack{m_builder, _runtimeManager,_gasout};
 
 	for (auto it = _basicBlock.begin(); it != _basicBlock.end(); ++it)
 	{
