@@ -6,20 +6,24 @@ Follow this guide to install the Aion Rust kernel on your PI 4B.
 
 ### System Requirements
 
-- Ubuntu 18.04
+- Ubuntu 18.04 64bit
 - 4GB RAM
 - Micro SD card 64/128 GB (Current Mainnet DB about 30GB)
 
 ### Prerequisites Installation
+1. There are two options to install ubuntu 18.04 64bit on PI4
 
-1. Update your system and install the build dependencies:
+   1. Ubuntu 18.04 for PI 4 is not offical released, you can use the [unofficail preintsalled image](https://github.com/TheRemote/Ubuntu-Server-raspi4-unofficial/releases) instead. 
+   2. Install officail 19.10 release from [ubuntu wiki](https://wiki.ubuntu.com/ARM/RaspberryPi), then install Docker and build a ubuntu arm64v8/ubuntu:18.04 docker image.
+   
+2. Update your system and install the build dependencies:
 
     ```bash
     sudo apt-get update
     sudo apt install g++ gcc libjsoncpp-dev python-dev libudev-dev llvm-4.0-dev cmake wget curl git pkg-config lsb-release -y
     ```
 
-2. Install Rust `v1.28.0`:
+3. Install Rust `v1.28.0`:
 
     ```bash
     curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.28.0
@@ -27,7 +31,7 @@ Follow this guide to install the Aion Rust kernel on your PI 4B.
 
     Select option `1` when prompted.
 
-3. Initialize the Rust install and check that it is working:
+4. Initialize the Rust install and check that it is working:
 
     ```bash
     source $HOME/.cargo/env
@@ -36,22 +40,22 @@ Follow this guide to install the Aion Rust kernel on your PI 4B.
     > cargo 1.28.0 (96a2c7d16 2018-07-13)
     ```
 
-4. Install Boost `v1.65.1`
+5. Install Boost `v1.65.1`
     
     ```bash
     sudo apt-get install libboost-all-dev -y
     ```
 
-5. Install JAVA JDK
+6. Install JAVA JDK
 
     ```bash
     sudo apt-get install openjdk-11-jdk -y
     ```
 
-6. Install Apache Ant 10
+7. Install Apache Ant 10
     * [Apache Ant 10](http://mirror.reverse.net/pub/apache//ant/binaries/apache-ant-1.10.7-bin.tar.gz)
 
-7. Set Environment Variables
+8. Set Environment Variables
     ```bash
     export JAVA_HOME=<jdk_directory_location>
     export ANT_HOME=<apache_ant_directory>	
