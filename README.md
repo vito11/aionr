@@ -13,7 +13,8 @@ Follow this guide to install the Aion Rust kernel on your PI 4B.
 ### Prerequisites Installation
 1. There are two options to install ubuntu 18.04 64bit on PI4
 
-   1. Ubuntu 18.04 for PI 4 is not offical released, you can use the [unofficail preintsalled image](https://github.com/TheRemote/Ubuntu-Server-raspi4-unofficial/releases) instead. 
+   1. Ubuntu 18.04 for PI 4 is not offical released, you can use the [unofficail preinstalled image](https://github.com/TheRemote/Ubuntu-Server-raspi4-unofficial/releases) instead. 
+   
    2. Install officail 19.10 release from [ubuntu wiki](https://wiki.ubuntu.com/ARM/RaspberryPi), then install Docker and build a ubuntu arm64v8/ubuntu:18.04 docker image.
    
 2. Update your system and install the build dependencies:
