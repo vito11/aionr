@@ -246,7 +246,22 @@ pub extern fn call(obj: *mut libc::c_void, info: *mut u8, msg: *const u8) -> *co
     result_info.output_size = result.return_data.len();
     debug!(target: "vm", "output_data: {:?}", result.return_data);
     if result_info.output_size > 0 {
+
         result_info.output_data = unsafe { ::std::mem::transmute(&result.return_data[0]) };
+    
+        let res: *mut u8 = unsafe {
+            let out_ptr = ::libc::malloc(result_info.output_size);
+            ::std::mem::transmute(out_ptr)
+        };
+        unsafe {
+            let x: isize = result_info.output_size as isize;
+            for i in 0..x {
+               *(res.offset(i)) = *((result_info.output_data).offset(i));
+            }
+        }
+
+        result_info.output_data = res;
+
     }
     result_info.output_data
 }

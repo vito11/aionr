@@ -211,6 +211,11 @@ extern "C" {
     uint8_t *buf = (uint8_t *)malloc(info.output_size);
     memcpy(buf, output_ptr, info.output_size);;
 
+    if(result->output_size > 0 && output_ptr!=NULL)
+    {
+      free(output_ptr);
+    }
+    
     result->output_data = buf;
 
     debug("\ncall status code = %d\n", info.status);
