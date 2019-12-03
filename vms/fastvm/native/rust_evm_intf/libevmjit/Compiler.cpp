@@ -271,9 +271,6 @@ std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_itera
 
 	makeGasoutSupportAarch64(runtimeManager);
 
-
-    delete(gas_out);
-
 	/* dump bitcode for debug
 	bitcode can be convert to readable IR code by llvm-dis
 
