@@ -1,5 +1,7 @@
 # AionR for Aarch64/Raspberry Pi 4B
 
+<img src="oan.png" alt="drawing" width="500"/>
+
 ## Install the Kernel
 
 Follow this guide to install the Aion Rust kernel on your PI 4B.
