@@ -3,11 +3,13 @@
 #include "preprocessor/llvm_includes_start.h"
 #include <llvm/IR/IntrinsicInst.h>
 #include "preprocessor/llvm_includes_end.h"
+#include <llvm/IR/Module.h>
 
 #include "Type.h"
 #include "GasMeter.h"
 #include "Endianness.h"
 #include "RuntimeManager.h"
+#include "CompilerHelper.h"
 
 namespace dev
 {
@@ -47,6 +49,7 @@ llvm::Function* Memory::getRequireFunc()
 		auto preBB = llvm::BasicBlock::Create(func->getContext(), "Pre", func);
 		auto checkBB = llvm::BasicBlock::Create(func->getContext(), "Check", func);
 		auto resizeBB = llvm::BasicBlock::Create(func->getContext(), "Resize", func);
+		auto notGasoutBB = llvm::BasicBlock::Create(func->getContext(), "NotGasout", func);
 		auto returnBB = llvm::BasicBlock::Create(func->getContext(), "Return", func);
 
 		InsertPointGuard guard(m_builder); // Restores insert point at function exit
@@ -83,7 +86,17 @@ llvm::Function* Memory::getRequireFunc()
 		auto costOk = m_builder.CreateAnd(blkOffsetOk, blkSizeOk, "costOk");
 		auto c = m_builder.CreateSelect(costOk, cc, m_builder.getInt64(std::numeric_limits<int64_t>::max()), "c");
 		m_gasMeter.count(c, jmpBuf, gas);
+
+        llvm::Module* _module = getModule();
+		llvm::Value* _gasout = _module->getGlobalVariable("gas_out");
+		auto is_gasout = m_builder.CreateLoad(_gasout);
+	    auto flow = m_builder.CreateICmpEQ(is_gasout, m_builder.getInt1(1));
+	    m_builder.CreateCondBr(flow, returnBB, notGasoutBB, Type::expectTrue);
+
 		// Resize
+		
+		m_builder.SetInsertPoint(notGasoutBB);
+
 		m_memory.extend(mem, sizeReq);
 		m_builder.CreateBr(returnBB);
 

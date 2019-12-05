@@ -134,12 +134,11 @@ void Compiler::makeGasoutSupportAarch64(RuntimeManager& runtimeManager)
 			if (llvm::isa<llvm::CallInst>(ii)) {
 			  llvm::CallInst* gasCheck_call = llvm::cast<llvm::CallInst>(ii);
 			  llvm::StringRef name = gasCheck_call->getCalledFunction()->getName();
-			  if(name.equals("gas.check") && std::next(i)!= e)
+			  if((name.equals("mem.require") || name.equals("gas.check")) && std::next(i)!= e)
 			  {
 				llvm::Instruction* next = &*(std::next(i));
 				gasCheck_Instuctions.push_back(ii);
 				next_Instuctions.push_back(next);
-				break;
 			  }
 			}
 		}
@@ -150,10 +149,6 @@ void Compiler::makeGasoutSupportAarch64(RuntimeManager& runtimeManager)
 		llvm::Instruction* next= next_Instuctions[index];
 
 		runtimeManager.gasOutExit(ReturnCode::OutOfGas, ins, next);
-		/*llvm::errs() << *ins << "\n";
-		llvm::errs() << *next << "\n";
-		llvm::errs() << "\n";*/
-
 	}
 
 }
@@ -272,9 +267,9 @@ std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_itera
 	makeGasoutSupportAarch64(runtimeManager);
 
 	/* dump bitcode for debug
-	bitcode can be convert to readable IR code by llvm-dis
+	bitcode can be convert to readable IR code by llvm-dis*/
 
-	std::error_code EC;
+	/*std::error_code EC;
     llvm::raw_fd_ostream OS("./module", EC, llvm::sys::fs::F_None);
     WriteBitcodeToFile(m, OS);
     OS.flush();*/
