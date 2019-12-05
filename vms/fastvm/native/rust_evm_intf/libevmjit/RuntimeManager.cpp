@@ -106,11 +106,10 @@ llvm::Twine getName(RuntimeData::Index _index)
 }
 }
 
-RuntimeManager::RuntimeManager(IRBuilder& _builder, code_iterator _codeBegin, code_iterator _codeEnd, llvm::GlobalVariable* _gasout):
+RuntimeManager::RuntimeManager(IRBuilder& _builder, code_iterator _codeBegin, code_iterator _codeEnd):
 	CompilerHelper(_builder),
 	m_codeBegin(_codeBegin),
-	m_codeEnd(_codeEnd),
-	m_gasout(_gasout)
+	m_codeEnd(_codeEnd)
 {
 	m_txCtxLoaded = m_builder.CreateAlloca(m_builder.getInt1Ty(), nullptr, "txctx.loaded");
 	m_builder.CreateStore(m_builder.getInt1(false), m_txCtxLoaded);
@@ -264,27 +263,6 @@ void RuntimeManager::exit(ReturnCode _returnCode)
 	m_builder.CreateBr(m_exitBB);
 	auto retPhi = llvm::cast<llvm::PHINode>(&m_exitBB->front());
 	retPhi->addIncoming(Constant::get(_returnCode), m_builder.GetInsertBlock());
-}
-
-void RuntimeManager::gasOutExit(ReturnCode _returnCode,llvm::Instruction* gas_check, llvm::Instruction* split_before)
-{
-	llvm::IRBuilder<> IRB(split_before);
-	auto is_gasout = IRB.CreateLoad(m_gasout);
-	auto flow = IRB.CreateICmpEQ(is_gasout, m_builder.getInt1(1));
-
-	auto SuccessProb = llvm::BranchProbabilityInfo::getBranchProbStackProtector(true);
-    auto FailureProb = llvm::BranchProbabilityInfo::getBranchProbStackProtector(false);
-    llvm::MDNode *Weights = llvm::MDBuilder(getModule()->getContext())
-                        .createBranchWeights(SuccessProb.getNumerator(),
-                                             FailureProb.getNumerator());
-
-	llvm::Instruction* BI = llvm::SplitBlockAndInsertIfThen(flow, split_before, true, Weights);
-	llvm::BasicBlock* block = BI->getParent();
-	llvm::BranchInst* exit = llvm::BranchInst::Create(m_exitBB);
-    BI->eraseFromParent();
-    block->getInstList().insert(block->getFirstInsertionPt(),exit);
-	auto retPhi = llvm::cast<llvm::PHINode>(&m_exitBB->front());
-	retPhi->addIncoming(Constant::get(_returnCode), block);
 }
 
 void RuntimeManager::abort(llvm::Value* _jmpBuf)

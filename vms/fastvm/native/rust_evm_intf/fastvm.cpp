@@ -218,9 +218,9 @@ extern "C" {
     
     result->output_data = buf;
 
-    debug("\ncall status code = %d\n", info.status);
-    debug("call gas_left = %ld\n", info.gas_left);
-    debug("call output_size = %ld\n", info.output_size);
+    //printf("\ncall status code = %d\n", info.status);
+    //printf("call gas_left = %ld\n", info.gas_left);
+    //printf("call output_size = %ld\n", info.output_size);
 
     result->release = &release_result;
     result->reserved.context = buf;
@@ -378,7 +378,7 @@ extern "C" {
     result->status_code = evm_result.status_code;
     result->gas_left = evm_result.gas_left;
     result->output_size = evm_result.output_size;
-    debug("evm execution result's gas left = %d\n", result->gas_left);
+    //printf("evm execution result's gas left = %d, status_code = %d\n", result->gas_left, (uint8_t)result->status_code);
     //memcpy(result->output_data, evm_result.output_data, result->output_size * sizeof(uint8_t));
     for (idx = 0; idx < result->output_size; idx++) {
       result->output_data[idx] = evm_result.output_data[idx];

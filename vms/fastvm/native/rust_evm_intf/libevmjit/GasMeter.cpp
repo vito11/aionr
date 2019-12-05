@@ -88,7 +88,6 @@ void GasMeter::count(llvm::Value* _cost, llvm::Value* _jmpBuf, llvm::Value* _gas
 	llvm::CallInst* gas_check = m_builder.CreateCall(m_gasCheckFunc, {_gasPtr ? _gasPtr : m_runtimeManager.getGasPtr(), _cost, _jmpBuf ? _jmpBuf : m_runtimeManager.getJmpBuf()});
 	//m_runtimeManager.myexit(ReturnCode::OutOfGas,gas_check);
 }
-
 void GasMeter::countExp(llvm::Value* _exponent)
 {
 	// Additional cost is 1 per significant byte of exponent

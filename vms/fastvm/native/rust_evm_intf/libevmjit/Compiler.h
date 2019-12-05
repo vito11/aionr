@@ -34,7 +34,7 @@ private:
 	void compileBasicBlock(BasicBlock& _basicBlock, class RuntimeManager& _runtimeManager, class Arith128& _arith, class Memory& _memory, class Ext& _ext, class GasMeter& _gasMeter, llvm::GlobalVariable* _gasout);
 
 	void resolveJumps();
-	void makeGasoutSupportAarch64(class RuntimeManager& _runtimeManager);
+    void makeGasoutSupportAarch64(class RuntimeManager& runtimeManager,llvm::BasicBlock* _abortBB,llvm::GlobalVariable* _gasout);
 
 	void pushWord256(LocalStack& stack, llvm::Value *hash);
 	llvm::Value * popWord256(LocalStack& stack);

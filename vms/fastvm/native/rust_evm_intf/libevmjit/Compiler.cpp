@@ -9,6 +9,7 @@
 #include <llvm/IR/CFG.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IntrinsicInst.h>
+#include <llvm/Transforms/Utils/BasicBlockUtils.h>
 #include "preprocessor/llvm_includes_end.h"
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
@@ -119,7 +120,7 @@ std::vector<BasicBlock> Compiler::createBasicBlocks(code_iterator _codeBegin, co
 
 	return blocks;
 }
-void Compiler::makeGasoutSupportAarch64(RuntimeManager& runtimeManager)
+void Compiler::makeGasoutSupportAarch64(RuntimeManager& runtimeManager,llvm::BasicBlock* _abortBB,llvm::GlobalVariable* _gasout)
 {
 	std::vector<llvm::Instruction*> gasCheck_Instuctions;
 	std::vector<llvm::Instruction*> next_Instuctions;
@@ -148,9 +149,16 @@ void Compiler::makeGasoutSupportAarch64(RuntimeManager& runtimeManager)
 		llvm::Instruction* ins= gasCheck_Instuctions[index];
 		llvm::Instruction* next= next_Instuctions[index];
 
-		runtimeManager.gasOutExit(ReturnCode::OutOfGas, ins, next);
-	}
+		llvm::IRBuilder<> IRB(next);
+		auto is_gasout = IRB.CreateLoad(_gasout);
+		auto flow = IRB.CreateICmpEQ(is_gasout, m_builder.getInt1(1));
 
+		llvm::Instruction* BI = llvm::SplitBlockAndInsertIfThen(flow, next, true);
+		llvm::BasicBlock* block = BI->getParent();
+		llvm::BranchInst* abort = llvm::BranchInst::Create(_abortBB);
+		BI->eraseFromParent();
+		block->getInstList().insert(block->getFirstInsertionPt(),abort);
+	}
 }
 
 void Compiler::resolveJumps()
@@ -229,9 +237,10 @@ std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_itera
 
 	m_builder.SetInsertPoint(entryBB);
 
+	m_builder.CreateStore(m_builder.getInt1(0), gas_out);
 
 	// Init runtime structures.
-	RuntimeManager runtimeManager(m_builder, _begin, _end, gas_out);
+	RuntimeManager runtimeManager(m_builder, _begin, _end);
 	GasMeter gasMeter(m_builder, runtimeManager, m_rev, gas_out);
 	Memory memory(runtimeManager, gasMeter, m_rev);
 	Ext ext(runtimeManager, memory);
@@ -264,7 +273,7 @@ std::unique_ptr<llvm::Module> Compiler::compile(code_iterator _begin, code_itera
 
 	resolveJumps();
 
-	makeGasoutSupportAarch64(runtimeManager);
+	makeGasoutSupportAarch64(runtimeManager,abortBB, gas_out);
 
 	/* dump bitcode for debug
 	bitcode can be convert to readable IR code by llvm-dis*/

@@ -430,6 +430,7 @@ static evm_result execute(evm_instance* instance, evm_context* context, evm_revi
 	rt.gas = msg->gas;
 	rt.callData = msg->input;
 	rt.callDataSize = msg->input_size;
+
 	std::memcpy(&rt.apparentValue, &msg->value, sizeof(msg->value));
 	std::memcpy(&rt.address, &msg->address, sizeof(msg->address));
 	std::memcpy(&rt.caller, &msg->caller, sizeof(msg->caller));
